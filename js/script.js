@@ -5,6 +5,9 @@ let inputForm = document.querySelector("form")
 let photoList = document.querySelector("#photoList")
 let redditImg = []
 let emptyImgSrc = document.getElementById("emptyImgSrc")
+let imgSrc = document.createElement("img")
+imgSrc.width = '400'
+emptyImgSrc.appendChild(imgSrc)
 
 const imageTypes = [".jpg", "jpeg", ".png"]
 // REQUEST DATA
@@ -12,7 +15,7 @@ const imageTypes = [".jpg", "jpeg", ".png"]
     inputForm.addEventListener("submit", (e) => {
         e.preventDefault()
         //get user inputed text
-        let userInput = input.value 
+        let userInput = inputForm.value 
     //make fetch request to const api url with given user number
         fetch(requestUrl + userInput)
         //.then --> take response data and format
@@ -21,29 +24,36 @@ const imageTypes = [".jpg", "jpeg", ".png"]
         })
         //.then --> use response JSON data
         .then((jsonData) => {
-            photoRes = jsonData.data.children
+            photoRes = jsonData.data.children.map(child => {
+                return {
+                    url: child.data.url_overridden_by_dest
+                }
+            })
             //domPhotoList(photoRes)
             // for (let i = 0; i < photoRes.length; i++) {
             //     if (photoRes[i].data.jpg
             //         console.log(photoRes[i].jpg)
             // }}
-            //.filter(element => String(element.data.url_overridden_by_dest).includes(".jpg"))
-            .map(filteredData => filteredData.data.url_overridden_by_dest)
-            console.log(photoRes)
+            .filter(photoRes => {
+                const fileExtension = img.url.slice(-4)
+                if (fileExtension === '.jpg' || fileExtension === '.png') {
+                    return true
+                } else {
+                    return false
+                } 
+              })  //String(element.data.url_overridden_by_dest).includes(".jpg"))//console.log(photoRes)
             for(let i =0; i < photoRes.length; i++) {
                 let newImgSrc = photoRes[i].data.url
                 if (newImgSrc.endsWith(".jpeg") || newImgSrc.endsWith(".png") || newImgSrc.endsWith(".jpg")) {
                     redditImg.push(newImgSrc)
                 }
             }
-            setInterval(function (){
-                emptyImgSrc.src = redditImg[i];
-                i++;
-                //have we reached the ending index?
-                if(i > redditImg.length){
-                    i = 0;
+            setInterval(function photoCarousel() {
+                for(let i = 0; i < redditImg.length; i++) {
+                    emptyImgSrc.src = redditImg[i]
                 }
-            }, 6000)
+            }, 1000)
+            displayImage(photoRes)
         })
         //.catch --> catch errors
         .catch((err) => {
@@ -53,17 +63,23 @@ const imageTypes = [".jpg", "jpeg", ".png"]
     })
     
 //RESPONSE DATA
+setInterval(function (){
+    emptyImgSrc.src = redditImg[i];
+    i++;
+    //have we reached the ending index?
+    if(i > redditImg.length){
+        i = 0;
+    }
+}, 6000)
 
-
-
-
-
+let button = document.querySelector("button")
+    button.addEventListener("click", clearInterval(photoCarousel()))
 //     //collect formatted data
 // function domPhotoList (photoRes) {
 //     photoRes.forEach((cat) => {
 //         console.log(cat.data.url)
 //         //create an li element for each response 
-//         let imgSrc = document.createElement("IMG")
+//         let imgSrc = document.createElement("img")
 //          imgSrc.src = cat.data.url //url_overridden_by_dest
 //         // // add li element to DOM
 //         setInterval(function catScrollingImg() {
@@ -72,8 +88,7 @@ const imageTypes = [".jpg", "jpeg", ".png"]
 //         }}, 1000)
 //         //photoList.appendChild(imgSrc)
 //     })    
-//     let button = document.querySelector("button")
-//     button.addEventListener("click", clearInterval(catScrollingImg()))
+//     
 // }
 
     
